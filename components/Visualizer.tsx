@@ -213,7 +213,7 @@ const Visualizer: React.FC<VisualizerProps> = ({
 
       for(let i=0; i < count; i++) {
         const newShape = original.clone();
-        newShape.scale.multiplyScalar(1.25 * (shapes.length + 1));
+        newShape.scale.multiplyScalar(Math.pow(1.25, shapes.length));
         
         // Random slight position offset
         newShape.position.x += (Math.random() - 0.5) * 2;
