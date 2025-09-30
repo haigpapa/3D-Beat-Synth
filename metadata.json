@@ -1,0 +1,7 @@
+{
+  "name": "3D Beat Synth",
+  "description": "A web application that uses camera-based hand gestures to sculpt 3D forms and generate sound in real time, creating an interactive audiovisual experience.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
