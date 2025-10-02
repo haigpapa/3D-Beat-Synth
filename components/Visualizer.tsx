@@ -204,7 +204,7 @@ const Visualizer: React.FC<VisualizerProps> = ({
     }
   };
 
-  const triggerDuplication = (count: number) => {
+  const triggerDuplication = useCallback((count: number) => {
       const { scene, shapes, audio } = threeStuff.current;
       if (!scene || !shapes || !shapes[0] || !audio) return;
       const original = shapes[0];
@@ -212,8 +212,9 @@ const Visualizer: React.FC<VisualizerProps> = ({
       const notesToPlay = [];
 
       for(let i=0; i < count; i++) {
+        const lastShape = shapes[shapes.length - 1];
         const newShape = original.clone();
-        newShape.scale.multiplyScalar(1.25 * (shapes.length + 1));
+        newShape.scale.copy(lastShape.scale).multiplyScalar(1.25);
         
         // Random slight position offset
         newShape.position.x += (Math.random() - 0.5) * 2;
@@ -236,9 +237,9 @@ const Visualizer: React.FC<VisualizerProps> = ({
           oldShape.geometry.dispose();
           (oldShape.material as THREE.Material).dispose();
       }
-  };
-  
-  const updateScene = () => {
+  }, []);
+
+  const updateScene = useCallback(() => {
     const { renderer, scene, camera, shapes, audio } = threeStuff.current;
     if (!renderer || !scene || !camera || !shapes || !shapes[0] || !audio) return;
     
@@ -263,7 +264,15 @@ const Visualizer: React.FC<VisualizerProps> = ({
     }
     
     renderer.render(scene, camera);
-  };
+  }, [isDroneSound]);
+
+  useEffect(() => {
+    (window as any).testing = {
+        threeStuff: threeStuff,
+        triggerDuplication: triggerDuplication,
+        updateScene: updateScene
+    }
+  }, [triggerDuplication, updateScene]);
   
   useEffect(() => {
     if(!isReady) return;
