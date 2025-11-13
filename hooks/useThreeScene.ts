@@ -15,9 +15,9 @@ interface UseThreeSceneOptions {
 
 // Geometry detail configurations
 const GEOMETRY_CONFIGS = {
-  low: { sphere: [1, 16, 16], cone: [1, 1, 16], cylinder: [1, 1, 16] },
-  medium: { sphere: [1, 32, 32], cone: [1, 1, 32], cylinder: [1, 1, 32] },
-  high: { sphere: [1, 64, 64], cone: [1, 1, 64], cylinder: [1, 1, 64] },
+  low: { sphere: [1, 16, 16], cone: [1, 2, 16], cylinder: [1, 1, 2, 16] },
+  medium: { sphere: [1, 32, 32], cone: [1, 2, 32], cylinder: [1, 1, 2, 32] },
+  high: { sphere: [1, 64, 64], cone: [1, 2, 64], cylinder: [1, 1, 2, 64] },
 };
 
 export const useThreeScene = ({
