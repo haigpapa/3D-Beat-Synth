@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback, useMemo } from 'react';
 import Header from './components/Header';
 import Visualizer from './components/Visualizer';
@@ -8,7 +7,7 @@ import PresetManager from './components/PresetManager';
 import InfoPanels from './components/InfoPanels';
 import ErrorBoundary from './components/ErrorBoundary';
 import { KeyboardShortcutsHelp } from './hooks/useKeyboardShortcuts';
-import { ShapeType, HandData, PerformanceConfig } from './types';
+import { HandData, PerformanceConfig } from './types';
 import { useSettings } from './hooks/useSettings';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
 import { useFullscreen } from './hooks/useFullscreen';
@@ -17,19 +16,23 @@ const App: React.FC = () => {
   const {
     settings,
     updateSetting,
+    updateSettings,
     resetSettings,
     exportSettings,
     importSettings,
     isLoaded,
   } = useSettings();
 
-  const { isFullscreen, toggleFullscreen } = useFullscreen();
-
   const [handData, setHandData] = useState<HandData>({
     left: { detected: false, scale: 0.5, colorHue: 38, rotation: { x: 0, y: 0, z: 0 } },
     right: { detected: false, liftedFingers: 0 },
   });
+
   const [texture, setTexture] = useState<string | null>(null);
+  const [screenshotCallback, setScreenshotCallback] = useState<(() => void) | null>(null);
+  const [clearShapesCallback, setClearShapesCallback] = useState<(() => void) | null>(null);
+
+  const { isFullscreen, toggleFullscreen } = useFullscreen();
 
   // Performance configuration
   const performanceConfig: PerformanceConfig = useMemo(() => ({
@@ -46,6 +49,8 @@ const App: React.FC = () => {
     settings,
     onUpdateSetting: updateSetting,
     onToggleFullscreen: toggleFullscreen,
+    onTakeScreenshot: () => screenshotCallback?.(),
+    onClearShapes: () => clearShapesCallback?.(),
   });
 
   const handleTextureUpload = useCallback((file: File) => {
@@ -121,6 +126,7 @@ const App: React.FC = () => {
           isPerformanceMode={settings.isPerformanceMode}
           onPerformanceModeChange={(mode) => updateSetting('isPerformanceMode', mode)}
         />
+
         <main className="grid grid-cols-1 lg:grid-cols-3 gap-6 flex-1">
           <div className="lg:col-span-2">
             <Visualizer
@@ -133,8 +139,37 @@ const App: React.FC = () => {
               performanceConfig={performanceConfig}
               onHandDataUpdate={setHandData}
               deviceId={settings.deviceId}
+              // Enhanced visual settings
+              rainbowMode={settings.rainbowMode}
+              pulseMode={settings.pulseMode}
+              glowMode={settings.glowMode}
+              enableParticles={settings.enableParticles}
+              backgroundEffect={settings.backgroundEffect}
+              cameraAutoRotate={settings.cameraAutoRotate}
+              enableShadows={settings.enableShadows}
+              enableGesturePresets={settings.enableGesturePresets}
+              // Audio settings for enhanced synth
+              masterVolume={settings.masterVolume}
+              droneVolume={settings.droneVolume}
+              notesVolume={settings.notesVolume}
+              musicScale={settings.musicScale}
+              instrumentPreset={settings.instrumentPreset}
+              enableReverb={settings.enableReverb}
+              reverbSize={settings.reverbSize}
+              enableDelay={settings.enableDelay}
+              delayTime={settings.delayTime}
+              delayFeedback={settings.delayFeedback}
+              enableFilter={settings.enableFilter}
+              filterCutoff={settings.filterCutoff}
+              enableArpeggiator={settings.enableArpeggiator}
+              arpeggiatorSpeed={settings.arpeggiatorSpeed}
+              chordMode={settings.chordMode}
+              // Callbacks
+              onScreenshotReady={setScreenshotCallback}
+              onClearShapesReady={setClearShapesCallback}
             />
           </div>
+
           <div className="flex flex-col gap-6 overflow-y-auto max-h-[calc(100vh-12rem)]">
             <Controls
               isHandTracking={settings.isHandTracking}
@@ -145,16 +180,19 @@ const App: React.FC = () => {
               onSampleTextureSelect={handleSampleTexture}
               onCameraChange={(deviceId) => updateSetting('deviceId', deviceId)}
             />
+
             <AudioControls
               settings={settings}
               onUpdateSetting={updateSetting}
             />
+
             <PresetManager
               settings={settings}
               onExport={exportSettings}
               onImport={importSettings}
               onReset={resetSettings}
             />
+
             <InfoPanels handData={handData} />
           </div>
         </main>
