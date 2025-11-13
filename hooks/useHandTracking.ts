@@ -201,7 +201,7 @@ export const useHandTracking = ({ enabled, deviceId, onError }: UseHandTrackingO
         onError(new Error(errorMsg));
       }
     }
-  }, [onError]);
+  }, [deviceId, onError]);
 
   // Stop camera stream
   const stopCamera = useCallback(() => {
