@@ -1,8 +1,8 @@
 import React, { useRef } from 'react';
 import ToggleSwitch from './ui/ToggleSwitch';
-// FIX: Imported LeftHandIcon and RightHandIcon.
 import { UploadIcon, GridIcon, FingerprintIcon, LeftHandIcon, RightHandIcon } from './icons';
 import Button from './ui/Button';
+import CameraControls from './CameraControls';
 
 interface ControlsProps {
   isHandTracking: boolean;
@@ -11,11 +11,13 @@ interface ControlsProps {
   onWireframeChange: (enabled: boolean) => void;
   onTextureUpload: (file: File) => void;
   onSampleTextureSelect: (texture: 'grid' | 'fingerprint') => void;
+  onCameraChange: (deviceId: string) => void;
 }
 
 const Controls: React.FC<ControlsProps> = ({
   isHandTracking,
   onHandTrackingChange,
+  onCameraChange,
   isWireframe,
   onWireframeChange,
   onTextureUpload,
@@ -52,6 +54,13 @@ const Controls: React.FC<ControlsProps> = ({
             ariaLabel="Toggle hand tracking"
           />
         </SettingRow>
+
+        {isHandTracking && (
+          <div className="pl-4 border-l border-gray-700">
+            <CameraControls onCameraChange={onCameraChange} />
+          </div>
+        )}
+
         <SettingRow
           title="Wireframe Mode"
           description="Toggle between wireframe and solid rendering"
