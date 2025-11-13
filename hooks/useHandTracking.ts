@@ -25,15 +25,18 @@ export const useHandTracking = ({ enabled, onError }: UseHandTrackingOptions) =>
   // Initialize MediaPipe
   const setupMediaPipe = useCallback(async () => {
     try {
+      console.log('Initializing MediaPipe...');
       const vision: VisionStatic = window.vision;
       if (!vision) {
         throw new Error('MediaPipe vision library not loaded. Please check your internet connection.');
       }
 
+      console.log('MediaPipe vision library found, loading fileset resolver...');
       const filesetResolver = await vision.FilesetResolver.forVisionTasks(
         'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.3/wasm'
       );
 
+      console.log('Fileset resolver loaded, creating hand landmarker...');
       const handLandmarker = await vision.HandLandmarker.createFromOptions(filesetResolver, {
         baseOptions: {
           modelAssetPath: 'https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task',
@@ -43,11 +46,13 @@ export const useHandTracking = ({ enabled, onError }: UseHandTrackingOptions) =>
         numHands: 2,
       });
 
+      console.log('Hand landmarker created successfully');
       handLandmarkerRef.current = handLandmarker;
       setIsReady(true);
+      setError(null); // Clear any previous errors
     } catch (e) {
       const errorMsg = 'Failed to load hand tracking model. Please ensure you have a modern browser and stable internet connection.';
-      console.error('Failed to initialize MediaPipe Hand Landmarker', e);
+      console.error('Failed to initialize MediaPipe Hand Landmarker:', e);
       setError(errorMsg);
       if (onError) {
         onError(new Error(errorMsg));
@@ -136,6 +141,7 @@ export const useHandTracking = ({ enabled, onError }: UseHandTrackingOptions) =>
   // Start camera stream
   const startCamera = useCallback(async () => {
     try {
+      console.log('Requesting camera access...');
       const stream = await navigator.mediaDevices.getUserMedia({
         video: {
           facingMode: 'user',
@@ -144,13 +150,38 @@ export const useHandTracking = ({ enabled, onError }: UseHandTrackingOptions) =>
         }
       });
 
+      console.log('Camera access granted, stream obtained:', stream);
+
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
         streamRef.current = stream;
+
+        // Wait for video metadata to load and then play
+        await new Promise<void>((resolve, reject) => {
+          if (!videoRef.current) {
+            reject(new Error('Video element not found'));
+            return;
+          }
+
+          videoRef.current.onloadedmetadata = () => {
+            console.log('Video metadata loaded');
+            if (videoRef.current) {
+              videoRef.current.play()
+                .then(() => {
+                  console.log('Video playing successfully');
+                  resolve();
+                })
+                .catch(reject);
+            }
+          };
+        });
+
+        console.log('Camera started successfully');
+        setError(null); // Clear any previous errors
       }
     } catch (err) {
       const errorMsg = 'Camera access denied. Please enable camera permissions for this site.';
-      console.error('Error accessing webcam', err);
+      console.error('Error accessing webcam:', err);
       setError(errorMsg);
       if (onError) {
         onError(new Error(errorMsg));
@@ -202,9 +233,12 @@ export const useHandTracking = ({ enabled, onError }: UseHandTrackingOptions) =>
 
   // Handle enabled state changes
   useEffect(() => {
+    console.log('Hand tracking state changed - enabled:', enabled, 'isReady:', isReady);
     if (enabled && isReady) {
+      console.log('Starting camera...');
       startCamera();
     } else {
+      console.log('Stopping camera...');
       stopCamera();
     }
   }, [enabled, isReady, startCamera, stopCamera]);
