@@ -98,34 +98,44 @@ const Visualizer: React.FC<VisualizerProps> = ({
 
   // Animation loop
   const animate = useCallback(() => {
-    if (!isReady) {
+    if (!sceneReady) {
       animationFrameId.current = requestAnimationFrame(animate);
       return;
     }
 
-    // Detect hands and process results
-    const currentHandData = detectHands(handleHandDataUpdate);
+    // Detect hands and process results (only if hand tracking is enabled)
+    if (isHandTracking && handTrackingReady) {
+      const currentHandData = detectHands(handleHandDataUpdate);
 
-    if (currentHandData && currentHandData.left.detected) {
-      // Update main shape
-      updateMainShape(
-        currentHandData.left.scale,
-        currentHandData.left.colorHue,
-        currentHandData.left.rotation
-      );
+      if (currentHandData && currentHandData.left.detected) {
+        // Update main shape
+        updateMainShape(
+          currentHandData.left.scale,
+          currentHandData.left.colorHue,
+          currentHandData.left.rotation
+        );
 
-      // Update drone sound
-      if (isDroneSound) {
-        const frequency = 100 + (currentHandData.left.scale - 0.2) * 200;
-        const harmonicity = 1 + (currentHandData.left.colorHue / 360) * 2;
-        updateDrone(frequency, harmonicity);
-        startDrone(frequency, harmonicity);
+        // Update drone sound
+        if (isDroneSound) {
+          const frequency = 100 + (currentHandData.left.scale - 0.2) * 200;
+          const harmonicity = 1 + (currentHandData.left.colorHue / 360) * 2;
+          updateDrone(frequency, harmonicity);
+          startDrone(frequency, harmonicity);
+        }
+      } else {
+        // Stop drone if hand not detected
+        if (isDroneSound) {
+          stopDrone();
+        }
       }
     } else {
-      // Stop drone if hand not detected
-      if (isDroneSound) {
-        stopDrone();
-      }
+      // If hand tracking is disabled, animate with default values
+      const time = Date.now() * 0.001;
+      updateMainShape(
+        1.0,
+        (time * 30) % 360, // Slowly cycling hue
+        { x: Math.sin(time * 0.5) * 0.3, y: time * 0.3, z: 0 }
+      );
     }
 
     // Render scene
@@ -140,7 +150,9 @@ const Visualizer: React.FC<VisualizerProps> = ({
       animationFrameId.current = requestAnimationFrame(animate);
     }
   }, [
-    isReady,
+    sceneReady,
+    isHandTracking,
+    handTrackingReady,
     detectHands,
     handleHandDataUpdate,
     updateMainShape,
@@ -152,9 +164,9 @@ const Visualizer: React.FC<VisualizerProps> = ({
     performanceConfig,
   ]);
 
-  // Start/stop animation loop based on hand tracking state
+  // Start/stop animation loop when scene is ready
   useEffect(() => {
-    if (isHandTracking && isReady) {
+    if (sceneReady) {
       animationFrameId.current = requestAnimationFrame(animate);
     }
 
@@ -163,7 +175,7 @@ const Visualizer: React.FC<VisualizerProps> = ({
         cancelAnimationFrame(animationFrameId.current);
       }
     };
-  }, [isHandTracking, isReady, animate]);
+  }, [sceneReady, animate]);
 
   // Handle drone sound toggle
   useEffect(() => {
