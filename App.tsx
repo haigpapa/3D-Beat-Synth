@@ -18,6 +18,7 @@ const App: React.FC = () => {
     left: { detected: false, scale: 0.5, colorHue: 38, rotation: { x: 0, y: 0, z: 0 } },
     right: { detected: false, liftedFingers: 0 },
   });
+  const [deviceId, setDeviceId] = useState<string | undefined>(undefined);
 
   // Performance configuration
   const performanceConfig: PerformanceConfig = {
@@ -104,6 +105,7 @@ const App: React.FC = () => {
               setDroneSound={setDroneSound}
               performanceConfig={performanceConfig}
               onHandDataUpdate={setHandData}
+              deviceId={deviceId}
             />
           </div>
           <div className="flex flex-col gap-6">
@@ -114,6 +116,7 @@ const App: React.FC = () => {
               onWireframeChange={setWireframe}
               onTextureUpload={handleTextureUpload}
               onSampleTextureSelect={handleSampleTexture}
+              onCameraChange={setDeviceId}
             />
             <InfoPanels handData={handData} />
           </div>

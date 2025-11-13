@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Visualizer Scaling', () => {
   test('should scale duplicated shapes correctly', async ({ page }) => {
-    await page.goto('http://localhost:3000');
+    await page.goto('/');
 
     // Wait for the visualizer to be ready
     await page.waitForFunction(() => (window as any).threeStuff && (window as any).threeStuff.shapes.length > 0);

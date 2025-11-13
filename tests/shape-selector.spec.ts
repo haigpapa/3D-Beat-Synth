@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Shape Selector', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('http://localhost:3000');
+    await page.goto('/');
     await page.waitForSelector('h1:has-text("3D Beat")');
   });
 

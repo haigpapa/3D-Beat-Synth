@@ -5,10 +5,11 @@ import * as THREE from 'three';
 
 interface UseHandTrackingOptions {
   enabled: boolean;
+  deviceId?: string;
   onError?: (error: Error) => void;
 }
 
-export const useHandTracking = ({ enabled, onError }: UseHandTrackingOptions) => {
+export const useHandTracking = ({ enabled, deviceId, onError }: UseHandTrackingOptions) => {
   const handLandmarkerRef = useRef<HandLandmarker | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const animationFrameId = useRef<number>();
@@ -21,6 +22,7 @@ export const useHandTracking = ({ enabled, onError }: UseHandTrackingOptions) =>
 
   const [isReady, setIsReady] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [cameras, setCameras] = useState<MediaDeviceInfo[]>([]);
 
   // Initialize MediaPipe
   const setupMediaPipe = useCallback(async () => {
@@ -138,16 +140,28 @@ export const useHandTracking = ({ enabled, onError }: UseHandTrackingOptions) =>
     return newHandData;
   }, []);
 
+  // Get available cameras
+  const getCameras = useCallback(async () => {
+    try {
+      await navigator.mediaDevices.getUserMedia({ video: true });
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      const videoDevices = devices.filter((device) => device.kind === 'videoinput');
+      setCameras(videoDevices);
+    } catch (err) {
+      console.error('Error enumerating cameras:', err);
+    }
+  }, []);
+
   // Start camera stream
   const startCamera = useCallback(async () => {
     try {
       console.log('Requesting camera access...');
       const stream = await navigator.mediaDevices.getUserMedia({
         video: {
-          facingMode: 'user',
+          deviceId: deviceId ? { exact: deviceId } : undefined,
           width: { ideal: 640 },
-          height: { ideal: 480 }
-        }
+          height: { ideal: 480 },
+        },
       });
 
       console.log('Camera access granted, stream obtained:', stream);
@@ -226,10 +240,11 @@ export const useHandTracking = ({ enabled, onError }: UseHandTrackingOptions) =>
   // Initialize on mount
   useEffect(() => {
     setupMediaPipe();
+    getCameras();
     return () => {
       stopCamera();
     };
-  }, [setupMediaPipe, stopCamera]);
+  }, [setupMediaPipe, stopCamera, getCameras]);
 
   // Handle enabled state changes
   useEffect(() => {
@@ -241,13 +256,14 @@ export const useHandTracking = ({ enabled, onError }: UseHandTrackingOptions) =>
       console.log('Stopping camera...');
       stopCamera();
     }
-  }, [enabled, isReady, startCamera, stopCamera]);
+  }, [enabled, isReady, startCamera, stopCamera, deviceId]);
 
   return {
     videoRef,
     handData,
     isReady,
     error,
+    cameras,
     detectHands,
     animationFrameId,
   };

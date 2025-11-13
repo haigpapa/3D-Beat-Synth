@@ -15,6 +15,7 @@ interface VisualizerProps {
   setDroneSound: (enabled: boolean) => void;
   performanceConfig: PerformanceConfig;
   onHandDataUpdate?: (data: HandData) => void;
+  deviceId?: string;
 }
 
 const NOTES = ['C3', 'E3', 'G3', 'B3', 'D4'];
@@ -28,6 +29,7 @@ const Visualizer: React.FC<VisualizerProps> = ({
   setDroneSound,
   performanceConfig,
   onHandDataUpdate,
+  deviceId,
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [error, setError] = useState<ErrorState | null>(null);
@@ -40,6 +42,7 @@ const Visualizer: React.FC<VisualizerProps> = ({
   // Initialize hooks
   const { videoRef, handData, isReady: handTrackingReady, error: handTrackingError, detectHands, animationFrameId } = useHandTracking({
     enabled: isHandTracking,
+    deviceId,
     onError: (err) => setError({ type: 'camera', message: err.message, recoverable: true }),
   });
 

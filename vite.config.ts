@@ -7,7 +7,7 @@ export default defineConfig(({ mode }) => {
     return {
       base: process.env.NODE_ENV === 'production' ? '/3D-Beat-Synth/' : '/',
       server: {
-        port: 3000,
+        port: 3001,
         host: '0.0.0.0',
       },
       plugins: [react()],
