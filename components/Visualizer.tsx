@@ -251,29 +251,27 @@ const Visualizer: React.FC<VisualizerProps> = ({
 
       <canvas ref={canvasRef} className="w-full h-full rounded-md" />
 
-      {/* Camera video feed - only shown when hand tracking is enabled */}
-      {isHandTracking && (
-        <div className="absolute bottom-4 right-4 sm:bottom-6 sm:right-6 w-32 h-24 sm:w-48 sm:h-36 rounded-md shadow-lg border-2 border-gray-700 bg-gray-800">
-          <video
-            ref={videoRef}
-            autoPlay
-            playsInline
-            muted
-            className="w-full h-full rounded-md object-cover"
-            style={{ transform: 'scaleX(-1)' }}
-          />
-          {handTrackingReady && !handTrackingError && (
-            <div className="absolute top-1 left-1 px-2 py-0.5 bg-green-500/80 text-xs rounded">
-              Camera Active
-            </div>
-          )}
-          {!handTrackingReady && !handTrackingError && (
-            <div className="absolute inset-0 flex items-center justify-center text-xs bg-gray-800/80">
-              Initializing camera...
-            </div>
-          )}
-        </div>
-      )}
+      {/* Camera video feed - always rendered but only visible when hand tracking is enabled */}
+      <div className={`absolute bottom-4 right-4 sm:bottom-6 sm:right-6 w-32 h-24 sm:w-48 sm:h-36 rounded-md shadow-lg border-2 bg-gray-800 ${isHandTracking ? 'border-gray-700' : 'border-transparent opacity-0 pointer-events-none'}`}>
+        <video
+          ref={videoRef}
+          autoPlay
+          playsInline
+          muted
+          className="w-full h-full rounded-md object-cover"
+          style={{ transform: 'scaleX(-1)' }}
+        />
+        {isHandTracking && handTrackingReady && !handTrackingError && (
+          <div className="absolute top-1 left-1 px-2 py-0.5 bg-green-500/80 text-xs rounded">
+            Camera Active
+          </div>
+        )}
+        {isHandTracking && !handTrackingReady && !handTrackingError && (
+          <div className="absolute inset-0 flex items-center justify-center text-xs bg-gray-800/80">
+            Initializing camera...
+          </div>
+        )}
+      </div>
 
       {!isReady && (
         <div className="absolute inset-0 bg-gray-900/80 flex items-center justify-center">
