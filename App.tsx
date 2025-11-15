@@ -1,10 +1,11 @@
 
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import Header from './components/Header';
 import Visualizer from './components/Visualizer';
 import Controls from './components/Controls';
 import AudioControls from './components/AudioControls';
 import PresetManager from './components/PresetManager';
+import PWAInstallPrompt from './components/PWAInstallPrompt';
 import InfoPanels from './components/InfoPanels';
 import ErrorBoundary from './components/ErrorBoundary';
 import { KeyboardShortcutsHelp } from './hooks/useKeyboardShortcuts';
@@ -12,6 +13,7 @@ import { ShapeType, HandData, PerformanceConfig } from './types';
 import { useSettings } from './hooks/useSettings';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
 import { useFullscreen } from './hooks/useFullscreen';
+import { usePWA, registerServiceWorker } from './hooks/usePWA';
 
 const App: React.FC = () => {
   const {
@@ -24,12 +26,18 @@ const App: React.FC = () => {
   } = useSettings();
 
   const { isFullscreen, toggleFullscreen } = useFullscreen();
+  const { isInstallable, isInstalled, isOnline, installApp, dismissInstallPrompt } = usePWA();
 
   const [handData, setHandData] = useState<HandData>({
     left: { detected: false, scale: 0.5, colorHue: 38, rotation: { x: 0, y: 0, z: 0 } },
     right: { detected: false, liftedFingers: 0 },
   });
   const [texture, setTexture] = useState<string | null>(null);
+
+  // Register service worker on mount
+  useEffect(() => {
+    registerServiceWorker();
+  }, []);
 
   // Performance configuration
   const performanceConfig: PerformanceConfig = useMemo(() => ({
@@ -170,6 +178,22 @@ const App: React.FC = () => {
         {isFullscreen && (
           <div className="fixed top-4 right-4 bg-black/80 px-4 py-2 rounded text-sm text-white z-40">
             Press ESC or F to exit fullscreen
+          </div>
+        )}
+
+        {/* PWA Install Prompt */}
+        {isInstallable && !isInstalled && (
+          <PWAInstallPrompt
+            onInstall={installApp}
+            onDismiss={dismissInstallPrompt}
+          />
+        )}
+
+        {/* Offline Indicator */}
+        {!isOnline && (
+          <div className="fixed top-4 left-4 bg-yellow-600 text-white px-4 py-2 rounded text-sm z-40 flex items-center gap-2">
+            <span>📡</span>
+            <span>Offline Mode</span>
           </div>
         )}
       </div>
