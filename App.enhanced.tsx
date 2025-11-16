@@ -140,7 +140,6 @@ const App: React.FC = () => {
               onHandDataUpdate={setHandData}
               deviceId={settings.deviceId}
               // Enhanced visual settings
-              rainbowMode={settings.rainbowMode}
               pulseMode={settings.pulseMode}
               glowMode={settings.glowMode}
               enableParticles={settings.enableParticles}

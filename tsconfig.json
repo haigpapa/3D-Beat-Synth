@@ -25,5 +25,9 @@
     },
     "allowImportingTsExtensions": true,
     "noEmit": true
-  }
+  },
+  "exclude": [
+    "App.enhanced.tsx",
+    "node_modules"
+  ]
 }

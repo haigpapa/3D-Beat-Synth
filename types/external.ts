@@ -29,16 +29,87 @@ export interface ToneSynth {
   frequency: { value: number };
   harmonicity: { value: number };
   state: 'started' | 'stopped';
+  connect(destination: any): void;
+}
+
+export interface TonePolySynth {
+  toDestination(): TonePolySynth;
+  triggerAttackRelease(notes: string | string[], duration: string): void;
+  volume: { value: number };
+  connect(destination: any): void;
+}
+
+export interface ToneEffect {
+  connect(destination: any): void;
+  wet: { value: number };
+}
+
+export interface ToneVolume {
+  toDestination(): ToneVolume;
+  volume: { value: number };
+}
+
+export interface ToneReverb extends ToneEffect {
+  decay: number;
+}
+
+export interface ToneFeedbackDelay extends ToneEffect {
+  delayTime: { value: number };
+  feedback: { value: number };
+}
+
+export interface ToneFilter extends ToneEffect {
+  frequency: { value: number };
+  type: string;
+  rolloff: number;
 }
 
 export interface ToneContext {
   state: 'running' | 'suspended' | 'closed';
 }
 
+export interface SynthOptions {
+  oscillator?: Partial<ToneOscillator>;
+  envelope?: Partial<ToneEnvelope>;
+}
+
+export interface FMSynthOptions {
+  harmonicity?: number;
+  modulationIndex?: number;
+  envelope?: Partial<ToneEnvelope>;
+}
+
+export interface ReverbOptions {
+  decay?: number;
+  wet?: number;
+}
+
+export interface DelayOptions {
+  delayTime?: number;
+  feedback?: number;
+  wet?: number;
+}
+
+export interface FilterOptions {
+  frequency?: number;
+  type?: 'lowpass' | 'highpass' | 'bandpass';
+  rolloff?: number;
+}
+
+export interface PolySynthConstructor {
+  new (voiceType?: any, options?: any): TonePolySynth;
+}
+
 export interface ToneStatic {
-  AMSynth: new (options: Partial<AMSynthOptions>) => ToneSynth;
-  PolySynth: new (synth: typeof ToneStatic.MembraneSynth) => ToneSynth;
-  MembraneSynth: any;
+  AMSynth: new (options?: Partial<AMSynthOptions>) => ToneSynth;
+  Synth: new (options?: Partial<SynthOptions>) => ToneSynth;
+  FMSynth: new (options?: Partial<FMSynthOptions>) => ToneSynth;
+  MembraneSynth: new () => ToneSynth;
+  PolySynth: PolySynthConstructor;
+  Volume: new (volume: number) => ToneVolume;
+  Reverb: new (options?: Partial<ReverbOptions>) => ToneReverb;
+  FeedbackDelay: new (options?: Partial<DelayOptions>) => ToneFeedbackDelay;
+  Filter: new (options?: Partial<FilterOptions>) => ToneFilter;
   context: ToneContext;
   start(): Promise<void>;
 }

@@ -1,5 +1,5 @@
 import { useRef, useCallback, useEffect, useState } from 'react';
-import { ToneSynth, ToneStatic } from '../types/external';
+import { ToneSynth, TonePolySynth, ToneStatic } from '../types/external';
 import { InstrumentPreset, MusicScale } from './useSettings';
 import { getScaleNotes, generateChord } from '../utils/musicScales';
 
@@ -36,11 +36,11 @@ export const useAudioSynthEnhanced = (options: UseAudioSynthEnhancedOptions = {}
   const [currentScale, setCurrentScale] = useState<MusicScale>(options.musicScale || 'pentatonic');
 
   // Get instrument settings based on preset
-  const getInstrumentSettings = useCallback((preset: InstrumentPreset) => {
+  const getInstrumentSettings = useCallback((preset: InstrumentPreset): TonePolySynth | null => {
     const Tone = window.Tone;
     if (!Tone) return null;
 
-    const settings: Record<InstrumentPreset, any> = {
+    const settings: Record<InstrumentPreset, () => TonePolySynth> = {
       piano: () => new Tone.PolySynth(Tone.Synth, {
         oscillator: { type: 'triangle' },
         envelope: { attack: 0.005, decay: 0.1, sustain: 0.3, release: 1 },

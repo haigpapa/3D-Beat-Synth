@@ -12,7 +12,7 @@ interface UseHandTrackingOptions {
 export const useHandTracking = ({ enabled, deviceId, onError }: UseHandTrackingOptions) => {
   const handLandmarkerRef = useRef<HandLandmarker | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
-  const animationFrameId = useRef<number>();
+  const animationFrameId = useRef<number | undefined>(undefined);
   const streamRef = useRef<MediaStream | null>(null);
 
   const [handData, setHandData] = useState<HandData>({

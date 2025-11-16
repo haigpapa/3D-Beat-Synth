@@ -1,5 +1,5 @@
 import { useRef, useCallback, useEffect, useState } from 'react';
-import { ToneSynth, ToneStatic } from '../types/external';
+import { ToneSynth, TonePolySynth, ToneStatic } from '../types/external';
 
 interface UseAudioSynthOptions {
   onError?: (error: Error) => void;
@@ -7,7 +7,7 @@ interface UseAudioSynthOptions {
 
 export const useAudioSynth = ({ onError }: UseAudioSynthOptions = {}) => {
   const droneRef = useRef<ToneSynth | null>(null);
-  const polySynthRef = useRef<ToneSynth | null>(null);
+  const polySynthRef = useRef<TonePolySynth | null>(null);
   const [isReady, setIsReady] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
 
